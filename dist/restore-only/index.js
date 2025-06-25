@@ -99689,8 +99689,10 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
                 throw error;
             }
             else if (typedError.name === DownloadValidationError.name) {
-                // Log download validation errors as warnings but don't fail the workflow
+                // Empty or invalid caches should be treated as cache misses
                 core.warning(`Cache download validation failed: ${typedError.message}`);
+                // Return undefined to indicate cache miss
+                return undefined;
             }
             else {
                 // Supress all non-validation cache related errors because caching should be optional
@@ -99741,6 +99743,11 @@ function saveCache(paths, key, options, enableCrossOsArchive = false) {
             }
             const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
             core.debug(`File Size: ${archiveFileSize}`);
+            // Validate archive before upload
+            if (archiveFileSize === 0) {
+                throw new ValidationError("Cache archive is empty (0 bytes). No files were found to cache. " +
+                    "Please check that the specified paths exist and contain files.");
+            }
             yield cacheHttpClient.saveCache(key, paths, archivePath, {
                 compressionMethod,
                 enableCrossOsArchive,
@@ -99979,10 +99986,10 @@ function downloadCacheHttpClientConcurrent(archiveLocation, archivePath, options
             let nextDownload;
             const waitAndWrite = () => __awaiter(this, void 0, void 0, function* () {
                 const segment = yield Promise.race(Object.values(activeDownloads));
-                yield archiveDescriptor.write(segment.buffer, 0, segment.count, segment.offset);
+                yield archiveDescriptor.write(segment.buffer, 0, segment.buffer.length, segment.offset);
                 actives--;
                 delete activeDownloads[segment.offset];
-                bytesDownloaded += segment.count;
+                bytesDownloaded += segment.buffer.length;
                 progressFn({ loadedBytes: bytesDownloaded });
             });
             while ((nextDownload = downloads.pop())) {

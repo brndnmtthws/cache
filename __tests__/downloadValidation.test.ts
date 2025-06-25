@@ -1,9 +1,8 @@
 import * as core from "@actions/core";
 import * as fs from "fs";
 import nock from "nock";
-import * as path from "path";
 
-import { DownloadValidationError, restoreCache } from "../src/custom/cache";
+import { restoreCache } from "../src/custom/cache";
 import { downloadCacheHttpClientConcurrent } from "../src/custom/downloadUtils";
 
 // Mock the core module
@@ -46,6 +45,7 @@ describe("Download Validation", () => {
             // Mock the initial range request to get content length
             nock("https://example.com")
                 .get("/cache.tar.gz")
+                .matchHeader("range", "bytes=0-1")
                 .reply(206, "partial content", {
                     "content-range": `bytes 0-1/${expectedSize}`
                 });
@@ -53,9 +53,10 @@ describe("Download Validation", () => {
             // Mock the actual content download with wrong size
             nock("https://example.com")
                 .get("/cache.tar.gz")
+                .matchHeader("range", "bytes=0-1023")
                 .reply(206, Buffer.alloc(512), {
-                    // Return only 512 bytes instead of 1024
-                    "content-range": "bytes 0-511/1024"
+                    // Return only 512 bytes when 1024 were expected
+                    "content-range": "bytes=0-511/1024"
                 });
 
             await expect(
@@ -83,6 +84,7 @@ describe("Download Validation", () => {
             // Mock the initial range request
             nock("https://example.com")
                 .get("/cache.tar.gz")
+                .matchHeader("range", "bytes=0-1")
                 .reply(206, "partial content", {
                     "content-range": `bytes 0-1/${expectedSize}`
                 });
@@ -90,6 +92,7 @@ describe("Download Validation", () => {
             // Mock the actual content download with correct size
             nock("https://example.com")
                 .get("/cache.tar.gz")
+                .matchHeader("range", `bytes=0-${expectedSize - 1}`)
                 .reply(206, testContent, {
                     "content-range": `bytes 0-${
                         expectedSize - 1

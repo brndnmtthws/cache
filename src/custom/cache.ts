@@ -167,10 +167,12 @@ export async function restoreCache(
         if (typedError.name === ValidationError.name) {
             throw error;
         } else if (typedError.name === DownloadValidationError.name) {
-            // Log download validation errors as warnings but don't fail the workflow
+            // Empty or invalid caches should be treated as cache misses
             core.warning(
                 `Cache download validation failed: ${typedError.message}`
             );
+            // Return undefined to indicate cache miss
+            return undefined;
         } else {
             // Supress all non-validation cache related errors because caching should be optional
             core.warning(`Failed to restore: ${(error as Error).message}`);
@@ -233,6 +235,14 @@ export async function saveCache(
         }
         const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
         core.debug(`File Size: ${archiveFileSize}`);
+
+        // Validate archive before upload
+        if (archiveFileSize === 0) {
+            throw new ValidationError(
+                "Cache archive is empty (0 bytes). No files were found to cache. " +
+                "Please check that the specified paths exist and contain files."
+            );
+        }
 
         await cacheHttpClient.saveCache(key, paths, archivePath, {
             compressionMethod,

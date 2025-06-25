@@ -18,5 +18,13 @@
     "import/no-duplicates": "error",
     "simple-import-sort/imports": "error",
     "sort-imports": "off"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["__tests__/**/*.ts"],
+      "rules": {
+        "@typescript-eslint/no-var-requires": "off"
+      }
+    }
+  ]
 }

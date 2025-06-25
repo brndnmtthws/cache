@@ -226,12 +226,12 @@ export async function downloadCacheHttpClientConcurrent(
             await archiveDescriptor.write(
                 segment.buffer,
                 0,
-                segment.count,
+                segment.buffer.length,
                 segment.offset
             );
             actives--;
             delete activeDownloads[segment.offset];
-            bytesDownloaded += segment.count;
+            bytesDownloaded += segment.buffer.length;
             progressFn({ loadedBytes: bytesDownloaded });
         };
 
