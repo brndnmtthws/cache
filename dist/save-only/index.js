@@ -99378,9 +99378,9 @@ const region = process.env.RUNS_ON_AWS_REGION ||
 const forcePathStyle = process.env.RUNS_ON_S3_FORCE_PATH_STYLE === "true" ||
     process.env.AWS_S3_FORCE_PATH_STYLE === "true";
 const uploadQueueSize = Number(process.env.UPLOAD_QUEUE_SIZE || "4");
-const uploadPartSize = Number(process.env.UPLOAD_PART_SIZE || "32") * 1024 * 1024;
+const uploadPartSize = Number(process.env.UPLOAD_PART_SIZE || "128") * 1024 * 1024;
 const downloadQueueSize = Number(process.env.DOWNLOAD_QUEUE_SIZE || "8");
-const downloadPartSize = Number(process.env.DOWNLOAD_PART_SIZE || "16") * 1024 * 1024;
+const downloadPartSize = Number(process.env.DOWNLOAD_PART_SIZE || "128") * 1024 * 1024;
 const s3Client = new client_s3_1.S3Client({ region, forcePathStyle, endpoint });
 function getCacheVersion(paths, compressionMethod, enableCrossOsArchive = false) {
     // don't pass changes upstream
@@ -99518,8 +99518,35 @@ function saveCache(key, paths, archivePath, { compressionMethod, enableCrossOsAr
         core.info(`Cache Size: ~${Math.round(cacheSize / (1024 * 1024))} MB (${cacheSize} B)`);
         const totalParts = Math.ceil(cacheSize / uploadPartSize);
         core.info(`Uploading cache from ${archivePath} to ${bucketName}/${s3Key}`);
+        // Only log progress at intervals to avoid stack overflow with many parts
+        let lastLoggedPart = 0;
+        const logInterval = Math.max(1, Math.floor(totalParts / 10)); // Log ~10 times total or every part for small uploads
         multipartUpload.on("httpUploadProgress", progress => {
-            core.info(`Uploaded part ${progress.part}/${totalParts}.`);
+            try {
+                // Safely check if progress and part number exist
+                if (!progress || typeof progress.part !== 'number') {
+                    return;
+                }
+                const currentPart = progress.part;
+                // Only log at intervals or on the last part
+                if (currentPart === totalParts || currentPart - lastLoggedPart >= logInterval) {
+                    const percentage = Math.round((currentPart / totalParts) * 100);
+                    // Build a safe log message with available information
+                    let message = `Upload progress: ${percentage}% (part ${currentPart}/${totalParts})`;
+                    // Add byte information if available
+                    if (typeof progress.loaded === 'number' && typeof progress.total === 'number') {
+                        const loadedMB = Math.round(progress.loaded / (1024 * 1024));
+                        const totalMB = Math.round(progress.total / (1024 * 1024));
+                        message += ` - ${loadedMB}MB/${totalMB}MB`;
+                    }
+                    core.info(message);
+                    lastLoggedPart = currentPart;
+                }
+            }
+            catch (error) {
+                // Silently ignore progress logging errors to prevent upload failure
+                core.debug(`Progress logging error: ${error}`);
+            }
         });
         yield multipartUpload.done();
         core.info(`Cache saved successfully.`);
