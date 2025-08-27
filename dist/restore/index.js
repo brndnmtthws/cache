@@ -5200,7 +5200,10 @@ class DefaultGlobber {
                     // Push the child items in reverse
                     const childLevel = item.level + 1;
                     const childItems = (yield __await(fs.promises.readdir(item.path))).map(x => new internal_search_state_1.SearchState(path.join(item.path, x), childLevel));
-                    stack.push(...childItems.reverse());
+                    // Fix for stack overflow with large arrays - avoid spread operator
+                    for (let i = childItems.length - 1; i >= 0; i--) {
+                        stack.push(childItems[i]);
+                    }
                 }
                 // File
                 else if (match & internal_match_kind_1.MatchKind.File) {
