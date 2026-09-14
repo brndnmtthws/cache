@@ -1,12 +1,11 @@
 import * as core from "@actions/core";
-import * as cache from "@actions/cache";
 
+import { State } from "../src/constants";
 import * as custom from "../src/custom/cache";
-import { restoreImpl } from "../src/restoreImpl";
-import { saveImpl } from "../src/saveImpl";
+import type { restoreImpl as RestoreImpl } from "../src/restoreImpl";
+import type { saveImpl as SaveImpl } from "../src/saveImpl";
 import { StateProvider } from "../src/stateProvider";
 import * as actionUtils from "../src/utils/actionUtils";
-import { State } from "../src/constants";
 
 jest.mock("@actions/core");
 jest.mock("@actions/cache");
@@ -15,10 +14,11 @@ jest.mock("../src/custom/cache");
 
 describe("Empty Cache Integration Tests", () => {
     let infoSpy: jest.SpyInstance;
-    let warningSpy: jest.SpyInstance;
     let setOutputSpy: jest.SpyInstance;
+    let restoreImpl: typeof RestoreImpl;
+    let saveImpl: typeof SaveImpl;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         jest.clearAllMocks();
 
         // Set up S3 environment
@@ -26,6 +26,10 @@ describe("Empty Cache Integration Tests", () => {
         process.env.RUNS_ON_AWS_REGION = "us-east-1";
         process.env.ACTIONS_CACHE_URL = "https://api.github.com";
         process.env.GITHUB_REF = "refs/heads/main";
+
+        // Load after S3 env setup because backend selection occurs during module evaluation.
+        ({ restoreImpl } = await import("../src/restoreImpl"));
+        ({ saveImpl } = await import("../src/saveImpl"));
 
         // Mock action utils
         (actionUtils.isCacheFeatureAvailable as jest.Mock).mockReturnValue(
@@ -45,15 +49,9 @@ describe("Empty Cache Integration Tests", () => {
         );
         (actionUtils.getInputAsBool as jest.Mock).mockReturnValue(false);
         (actionUtils.getInputAsInt as jest.Mock).mockReturnValue(undefined);
-        (actionUtils.logWarning as jest.Mock).mockImplementation(
-            (message: string) => {
-                warningSpy(message);
-            }
-        );
 
         // Mock core functions
         infoSpy = jest.spyOn(core, "info").mockImplementation();
-        warningSpy = jest.spyOn(core, "warning").mockImplementation();
         jest.spyOn(core, "setFailed").mockImplementation();
         setOutputSpy = jest.spyOn(core, "setOutput").mockImplementation();
         (core.getInput as jest.Mock).mockImplementation((name: string) => {

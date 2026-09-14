@@ -49,6 +49,7 @@ beforeEach(() => {
 
 afterEach(() => {
     testUtils.clearInputs();
+    process.exitCode = undefined;
     delete process.env[Events.Key];
     delete process.env[RefKey];
 });

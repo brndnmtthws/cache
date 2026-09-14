@@ -99293,24 +99293,24 @@ var Inputs;
     Inputs["EnableCrossOsArchive"] = "enableCrossOsArchive";
     Inputs["FailOnCacheMiss"] = "fail-on-cache-miss";
     Inputs["LookupOnly"] = "lookup-only"; // Input for cache, restore action
-})(Inputs = exports.Inputs || (exports.Inputs = {}));
+})(Inputs || (exports.Inputs = Inputs = {}));
 var Outputs;
 (function (Outputs) {
     Outputs["CacheHit"] = "cache-hit";
     Outputs["CachePrimaryKey"] = "cache-primary-key";
     Outputs["CacheMatchedKey"] = "cache-matched-key"; // Output from restore action
-})(Outputs = exports.Outputs || (exports.Outputs = {}));
+})(Outputs || (exports.Outputs = Outputs = {}));
 var State;
 (function (State) {
     State["CachePrimaryKey"] = "CACHE_KEY";
     State["CacheMatchedKey"] = "CACHE_RESULT";
-})(State = exports.State || (exports.State = {}));
+})(State || (exports.State = State = {}));
 var Events;
 (function (Events) {
     Events["Key"] = "GITHUB_EVENT_NAME";
     Events["Push"] = "push";
     Events["PullRequest"] = "pull_request";
-})(Events = exports.Events || (exports.Events = {}));
+})(Events || (exports.Events = Events = {}));
 exports.RefKey = "GITHUB_REF";
 
 
@@ -99337,13 +99337,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -99354,7 +99364,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.saveCache = exports.downloadCache = exports.getCacheEntry = exports.getCacheVersion = void 0;
+exports.getCacheVersion = getCacheVersion;
+exports.getCacheEntry = getCacheEntry;
+exports.downloadCache = downloadCache;
+exports.saveCache = saveCache;
 const client_s3_1 = __nccwpck_require__(3711);
 const { getSignedUrl } = __nccwpck_require__(8505);
 const fs_1 = __nccwpck_require__(9896);
@@ -99404,14 +99417,13 @@ function getCacheVersion(paths, compressionMethod, enableCrossOsArchive = false)
         .update(components.join("|"))
         .digest("hex");
 }
-exports.getCacheVersion = getCacheVersion;
 function getS3Prefix(paths, { compressionMethod, enableCrossOsArchive }) {
     const repository = process.env.GITHUB_REPOSITORY;
     const version = getCacheVersion(paths, compressionMethod, enableCrossOsArchive);
     return ["cache", repository, version].join("/");
 }
-function getCacheEntry(keys, paths, { compressionMethod, enableCrossOsArchive }) {
-    return __awaiter(this, void 0, void 0, function* () {
+function getCacheEntry(keys_1, paths_1, _a) {
+    return __awaiter(this, arguments, void 0, function* (keys, paths, { compressionMethod, enableCrossOsArchive }) {
         const cacheEntry = {};
         // Find the most recent key matching one of the restoreKeys prefixes
         for (const restoreKey of keys) {
@@ -99441,7 +99453,6 @@ function getCacheEntry(keys, paths, { compressionMethod, enableCrossOsArchive })
         return cacheEntry; // No keys found
     });
 }
-exports.getCacheEntry = getCacheEntry;
 function downloadCache(archiveLocation, archivePath, options) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!bucketName) {
@@ -99490,9 +99501,8 @@ function downloadCache(archiveLocation, archivePath, options) {
         throw lastError || new Error("Download failed after all retry attempts");
     });
 }
-exports.downloadCache = downloadCache;
-function saveCache(key, paths, archivePath, { compressionMethod, enableCrossOsArchive, cacheSize: archiveFileSize }) {
-    return __awaiter(this, void 0, void 0, function* () {
+function saveCache(key_1, paths_1, archivePath_1, _a) {
+    return __awaiter(this, arguments, void 0, function* (key, paths, archivePath, { compressionMethod, enableCrossOsArchive, cacheSize: archiveFileSize }) {
         if (!bucketName) {
             throw new Error("Environment variable RUNS_ON_S3_BUCKET_CACHE not set");
         }
@@ -99555,7 +99565,6 @@ function saveCache(key, paths, archivePath, { compressionMethod, enableCrossOsAr
         core.info(`Cache saved successfully.`);
     });
 }
-exports.saveCache = saveCache;
 
 
 /***/ }),
@@ -99582,13 +99591,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -99599,7 +99618,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.saveCache = exports.restoreCache = exports.isFeatureAvailable = exports.DownloadValidationError = exports.ReserveCacheError = exports.ValidationError = void 0;
+exports.DownloadValidationError = exports.ReserveCacheError = exports.ValidationError = void 0;
+exports.isFeatureAvailable = isFeatureAvailable;
+exports.restoreCache = restoreCache;
+exports.saveCache = saveCache;
 const core = __importStar(__nccwpck_require__(7484));
 const path = __importStar(__nccwpck_require__(6928));
 const utils = __importStar(__nccwpck_require__(8299));
@@ -99651,7 +99673,6 @@ function checkKey(key) {
 function isFeatureAvailable() {
     return !!process.env["ACTIONS_CACHE_URL"];
 }
-exports.isFeatureAvailable = isFeatureAvailable;
 /**
  * Restores cache from keys
  *
@@ -99662,8 +99683,8 @@ exports.isFeatureAvailable = isFeatureAvailable;
  * @param enableCrossOsArchive an optional boolean enabled to restore on windows any cache created on any platform
  * @returns string returns the key for the cache hit, otherwise returns undefined
  */
-function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArchive = false) {
-    return __awaiter(this, void 0, void 0, function* () {
+function restoreCache(paths_1, primaryKey_1, restoreKeys_1, options_1) {
+    return __awaiter(this, arguments, void 0, function* (paths, primaryKey, restoreKeys, options, enableCrossOsArchive = false) {
         checkPaths(paths);
         restoreKeys = restoreKeys || [];
         const keys = [primaryKey, ...restoreKeys];
@@ -99741,7 +99762,6 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
         return undefined;
     });
 }
-exports.restoreCache = restoreCache;
 /**
  * Saves a list of files with the specified key
  *
@@ -99751,8 +99771,8 @@ exports.restoreCache = restoreCache;
  * @param options cache upload options
  * @returns number returns cacheId if the cache was saved successfully and throws an error if save fails
  */
-function saveCache(paths, key, options, enableCrossOsArchive = false) {
-    return __awaiter(this, void 0, void 0, function* () {
+function saveCache(paths_1, key_1, options_1) {
+    return __awaiter(this, arguments, void 0, function* (paths, key, options, enableCrossOsArchive = false) {
         checkPaths(paths);
         checkKey(key);
         const compressionMethod = yield utils.getCompressionMethod();
@@ -99810,7 +99830,6 @@ function saveCache(paths, key, options, enableCrossOsArchive = false) {
         return cacheId;
     });
 }
-exports.saveCache = saveCache;
 
 
 /***/ }),
@@ -99836,13 +99855,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -99853,7 +99882,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.downloadCacheHttpClientConcurrent = exports.DownloadProgress = void 0;
+exports.DownloadProgress = void 0;
+exports.downloadCacheHttpClientConcurrent = downloadCacheHttpClientConcurrent;
 // Just a copy of the original file from the toolkit/actions/cache repository, with a change for byte range used in the downloadCacheHttpClientConcurrent function.
 const core = __importStar(__nccwpck_require__(7484));
 const http_client_1 = __nccwpck_require__(4844);
@@ -99968,8 +99998,8 @@ exports.DownloadProgress = DownloadProgress;
  * @param archivePath the local path where the cache is saved
  */
 function downloadCacheHttpClientConcurrent(archiveLocation, archivePath, options) {
-    var _a;
     return __awaiter(this, void 0, void 0, function* () {
+        var _a;
         const archiveDescriptor = yield fs.promises.open(archivePath, "w");
         const httpClient = new http_client_1.HttpClient("actions/cache", undefined, {
             socketTimeout: options.timeoutInMs,
@@ -100045,7 +100075,6 @@ function downloadCacheHttpClientConcurrent(archiveLocation, archivePath, options
         }
     });
 }
-exports.downloadCacheHttpClientConcurrent = downloadCacheHttpClientConcurrent;
 function downloadSegmentRetry(httpClient, archiveLocation, offset, count) {
     return __awaiter(this, void 0, void 0, function* () {
         const retries = 5;
@@ -100120,13 +100149,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -100137,7 +100176,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.saveRun = exports.saveOnlyRun = exports.saveImpl = void 0;
+exports.saveImpl = saveImpl;
+exports.saveOnlyRun = saveOnlyRun;
+exports.saveRun = saveRun;
 const cache = __importStar(__nccwpck_require__(5116));
 const core = __importStar(__nccwpck_require__(7484));
 const constants_1 = __nccwpck_require__(7242);
@@ -100200,7 +100241,6 @@ function saveImpl(stateProvider) {
         return cacheId;
     });
 }
-exports.saveImpl = saveImpl;
 function saveOnlyRun(earlyExit) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -100225,7 +100265,6 @@ function saveOnlyRun(earlyExit) {
         }
     });
 }
-exports.saveOnlyRun = saveOnlyRun;
 function saveRun(earlyExit) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -100247,7 +100286,6 @@ function saveRun(earlyExit) {
         }
     });
 }
-exports.saveRun = saveRun;
 
 
 /***/ }),
@@ -100273,13 +100311,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.NullStateProvider = exports.StateProvider = void 0;
 const core = __importStar(__nccwpck_require__(7484));
@@ -100348,15 +100396,32 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isCacheFeatureAvailable = exports.getInputAsBool = exports.getInputAsInt = exports.getInputAsArray = exports.isValidEvent = exports.logWarning = exports.isExactKeyMatch = exports.isGhes = void 0;
+exports.isGhes = isGhes;
+exports.isExactKeyMatch = isExactKeyMatch;
+exports.logWarning = logWarning;
+exports.isValidEvent = isValidEvent;
+exports.getInputAsArray = getInputAsArray;
+exports.getInputAsInt = getInputAsInt;
+exports.getInputAsBool = getInputAsBool;
+exports.isCacheFeatureAvailable = isCacheFeatureAvailable;
 const cache = __importStar(__nccwpck_require__(5116));
 const core = __importStar(__nccwpck_require__(7484));
 const constants_1 = __nccwpck_require__(7242);
@@ -100368,25 +100433,21 @@ function isGhes() {
     const isLocalHost = hostname.endsWith(".LOCALHOST");
     return !isGitHubHost && !isGitHubEnterpriseCloudHost && !isLocalHost;
 }
-exports.isGhes = isGhes;
 function isExactKeyMatch(key, cacheKey) {
     return !!(cacheKey &&
         cacheKey.localeCompare(key, undefined, {
             sensitivity: "accent"
         }) === 0);
 }
-exports.isExactKeyMatch = isExactKeyMatch;
 function logWarning(message) {
     const warningPrefix = "[warning]";
     core.info(`${warningPrefix}${message}`);
 }
-exports.logWarning = logWarning;
 // Cache token authorized for all events that are tied to a ref
 // See GitHub Context https://help.github.com/actions/automating-your-workflow-with-github-actions/contexts-and-expression-syntax-for-github-actions#github-context
 function isValidEvent() {
     return constants_1.RefKey in process.env && Boolean(process.env[constants_1.RefKey]);
 }
-exports.isValidEvent = isValidEvent;
 function getInputAsArray(name, options) {
     return core
         .getInput(name, options)
@@ -100394,7 +100455,6 @@ function getInputAsArray(name, options) {
         .map(s => s.replace(/^!\s+/, "!").trim())
         .filter(x => x !== "");
 }
-exports.getInputAsArray = getInputAsArray;
 function getInputAsInt(name, options) {
     const value = parseInt(core.getInput(name, options));
     if (isNaN(value) || value < 0) {
@@ -100402,12 +100462,10 @@ function getInputAsInt(name, options) {
     }
     return value;
 }
-exports.getInputAsInt = getInputAsInt;
 function getInputAsBool(name, options) {
     const result = core.getInput(name, options);
     return result.toLowerCase() === "true";
 }
-exports.getInputAsBool = getInputAsBool;
 function isCacheFeatureAvailable() {
     if (cache.isFeatureAvailable()) {
         return true;
@@ -100420,7 +100478,6 @@ Otherwise please upgrade to GHES version >= 3.5 and If you are also using Github
     logWarning("An internal error has occurred in cache backend. Please check https://www.githubstatus.com/ for any ongoing issue in actions.");
     return false;
 }
-exports.isCacheFeatureAvailable = isCacheFeatureAvailable;
 
 
 /***/ }),
