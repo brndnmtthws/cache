@@ -3,6 +3,7 @@
 ### Unreleased
 
 - Upgrade the GitHub Actions runtime and development toolchain to Node.js 24
+- Upgrade `@actions/cache` to v5.2.0 to remove Node.js's `punycode` deprecation warning
 
 ### 4.2.3
 
